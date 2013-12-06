@@ -18,15 +18,19 @@ import com.healthmarketscience.jackcess.Table;
 
 
 public class Main {
-	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
-		File inbound = new File("inbound/lahman591.mdb");
+
+    public static final String SOURCE_FILE = "inbound/lahman591.mdb";
+    public static final String TARGET_FILE = "outbound/lahman591.sqlite";
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
+		File inbound = new File(SOURCE_FILE);
 		
-		File outbound = new File("outbound/lahman591.sqlite");
+		File outbound = new File(TARGET_FILE);
 		if (outbound.exists()) {
 			outbound.delete();
 		}
 		Class.forName("org.sqlite.JDBC");
-		Connection conn = DriverManager.getConnection("jdbc:sqlite:outbound/lahman591.sqlite");
+		Connection conn = DriverManager.getConnection("jdbc:sqlite:" + TARGET_FILE);
 		
 		
 		Database db = Database.open(inbound);
