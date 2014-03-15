@@ -1,0 +1,5 @@
+inbound/
+outbound/
+.idea/
+baseball-archive-converter.iml
+out/
