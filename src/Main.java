@@ -19,8 +19,8 @@ import com.healthmarketscience.jackcess.Table;
 
 public class Main {
 
-    public static final String SOURCE_FILE = "inbound/lahman591.mdb";
-    public static final String TARGET_FILE = "outbound/lahman591.sqlite";
+    public static final String SOURCE_FILE = "inbound/lahman2013_beta.mdb";
+    public static final String TARGET_FILE = "outbound/lahman2013.sqlite";
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
 		File inbound = new File(SOURCE_FILE);
@@ -172,7 +172,7 @@ public class Main {
 				if (index.isUnique()) {
 					sql.append("unique ");
 				}
-				sql.append("index ").append(index.getName()).append(" on ").append(tableName).append(" (");
+				sql.append("index ").append(tableName).append("_").append(index.getName()).append(" on ").append(tableName).append(" (");
 				List<ColumnDescriptor> columns = index.getColumns();
 				int columnCounter = 0;
 				for (ColumnDescriptor column : columns) {
@@ -189,8 +189,9 @@ public class Main {
 					}
 				}
 				sql.append(")");
-				
-				conn.createStatement().execute(sql.toString());
+
+                System.out.println(sql.toString());
+                conn.createStatement().execute(sql.toString());
 			}
 			
 			conn.commit();
