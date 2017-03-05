@@ -19,8 +19,8 @@ import com.healthmarketscience.jackcess.Table;
 
 public class Main {
 
-    public static final String SOURCE_FILE = "inbound/lahman2015.mdb";
-    public static final String TARGET_FILE = "outbound/lahman2015.sqlite";
+    public static final String SOURCE_FILE = "inbound/lahman2016.mdb";
+    public static final String TARGET_FILE = "outbound/lahman2016.sqlite";
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
 		File inbound = new File(SOURCE_FILE);
