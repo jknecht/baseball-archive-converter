@@ -1,3 +1,4 @@
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -12,8 +13,9 @@ import java.util.Set;
 
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Index.ColumnDescriptor;
+import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 
 
@@ -33,13 +35,13 @@ public class Main {
 		Connection conn = DriverManager.getConnection("jdbc:sqlite:" + TARGET_FILE);
 		
 		
-		Database db = Database.open(inbound);
+		Database db = DatabaseBuilder.open(inbound);
 		Set<String> tableNames = db.getTableNames();
 		for (String tableName : tableNames) {
 			StringBuilder sb = new StringBuilder();
 			Table table = db.getTable(tableName);
 			sb.append("create table ").append(table.getName()).append(" (\n");
-			List<Column> columns = table.getColumns();
+			List<? extends Column> columns = table.getColumns();
 			int columnCounter = 0;
 			for (Column column : columns) {
 				String typeString = "INTEGER";
@@ -81,9 +83,9 @@ public class Main {
 			conn.createStatement().execute(sb.toString());
 			
 			//insert the data
-			Iterator<Map<String, Object>> rows = table.iterator();
+			Iterator<Row> rows = table.iterator();
 			while(rows.hasNext()) {
-				Map<String, Object> row = rows.next();
+				Row row = rows.next();
 				StringBuilder sql = new StringBuilder();
 				sql.append("insert into ").append(table.getName()).append(" (");
 				Set<String> columnNames = row.keySet();
@@ -109,7 +111,7 @@ public class Main {
 			conn.setAutoCommit(false);
 			Table table = db.getTable(tableName);
 			System.out.println("Populating " + table.getRowCount() + " rows into " + table.getName());
-			Iterator<Map<String, Object>> rows = table.iterator();
+			Iterator<Row> rows = table.iterator();
 			while(rows.hasNext()) {
 				Map<String, Object> row = rows.next();
 				StringBuilder sql = new StringBuilder();
@@ -164,7 +166,7 @@ public class Main {
 			conn.setAutoCommit(false);
 			Table table = db.getTable(tableName);
 			System.out.println("Indexing " + table.getName());
-			List<Index> indexes = table.getIndexes();
+			List<? extends Index> indexes = table.getIndexes();
 			for(Index index : indexes) {
 				
 				StringBuilder sql = new StringBuilder();
@@ -173,9 +175,9 @@ public class Main {
 					sql.append("unique ");
 				}
 				sql.append("index ").append(tableName).append("_").append(index.getName()).append(" on ").append(tableName).append(" (");
-				List<ColumnDescriptor> columns = index.getColumns();
+				List<? extends Index.Column> columns = index.getColumns();
 				int columnCounter = 0;
-				for (ColumnDescriptor column : columns) {
+				for (Index.Column column : columns) {
 					if (columnCounter++ > 0) {
 						sql.append(", ");
 					}

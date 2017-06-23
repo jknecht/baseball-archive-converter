@@ -3,3 +3,9 @@ outbound/
 .idea/
 baseball-archive-converter.iml
 out/
+/bin/
+/target/
+.classpath
+.project
+.settings/
+.DS_Store
