@@ -1,7 +1,7 @@
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Row;
 
-import java.util.Set;
+import java.util.stream.Collectors;
 
 public class InsertStatementBuilder {
     private Table table;
@@ -15,31 +15,24 @@ public class InsertStatementBuilder {
 
     public String build() {
         StringBuilder sql = new StringBuilder();
-        sql.append("insert into ").append(table.getName()).append(" (");
-        Set<String> columnNames = row.keySet();
-        int columnCounter = 0;
-        for (String columnName : columnNames) {
-            if (columnCounter++ > 0) {
-                sql.append(", ");
-            }
-            if (Character.isDigit(columnName.charAt(0))) {
-                sql.append("\"");
-            }
-            sql.append(columnName);
-            if (Character.isDigit(columnName.charAt(0))) {
-                sql.append("\"");
-            }
-        }
-        sql.append(") values (");
+        sql
+            .append("insert into ")
+            .append(table.getName())
+            .append(" (")
+            .append(row.keySet().stream()
+                    .map(columnName -> {
+                        if (Character.isDigit(columnName.charAt(0))) {
+                            return "\"" + columnName + "\"";
+                        } else {
+                            return columnName;
+                        }
+                    })
+                    .collect(Collectors.joining(", ")))
+            .append(") values (")
+            .append(row.keySet().stream()
+                    .map(columnName -> "?").collect(Collectors.joining(", ")))
+            .append(")");
         
-        columnCounter = 0;
-        for (String columnName : columnNames) {
-            if (columnCounter++ > 0) {
-                sql.append(", ");
-            }
-            sql.append("?");
-        }
-        sql.append(")");
         return sql.toString();
     }
 }

@@ -1,7 +1,7 @@
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Index;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class CreateIndexStatementBuilder {
     private Table table;
@@ -21,23 +21,26 @@ public class CreateIndexStatementBuilder {
         if (index.isUnique()) {
             sql.append("unique ");
         }
-        sql.append("index ").append(tableName).append("_").append(index.getName()).append(" on ").append(tableName).append(" (");
-        List<? extends Index.Column> columns = index.getColumns();
-        int columnCounter = 0;
-        for (Index.Column column : columns) {
-            if (columnCounter++ > 0) {
-                sql.append(", ");
-            }
-            String columnName = column.getName();
-            if (Character.isDigit(columnName.charAt(0))) {
-                sql.append("\"");
-            }
-            sql.append(columnName);
-            if (Character.isDigit(columnName.charAt(0))) {
-                sql.append("\"");
-            }
-        }
-        sql.append(")");
+        
+        sql
+            .append("index ")
+            .append(tableName)
+            .append("_")
+            .append(index.getName())
+            .append(" on ")
+            .append(tableName)
+            .append(" (")
+            .append(index.getColumns().stream()
+                .map(Index.Column::getName)
+                .map(columnName -> {
+                    if (Character.isDigit(columnName.charAt(0))) {
+                        return "\"" + columnName + "\"";
+                    } else {
+                        return columnName;
+                    }
+                }).collect(Collectors.joining(", ")))
+            .append(")");
+        
         return sql.toString();
     }
 }

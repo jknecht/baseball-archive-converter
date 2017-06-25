@@ -17,6 +17,8 @@ public class Main {
         accessDatabase.iterateData();
         accessDatabase.iterateIndexes();
         
+        sqliteDatabase.verify();
+        
         accessDatabase.close();
         sqliteDatabase.close();
         		

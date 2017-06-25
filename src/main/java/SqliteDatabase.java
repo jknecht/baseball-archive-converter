@@ -5,16 +5,26 @@ import com.healthmarketscience.jackcess.Table;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class SqliteDatabase implements EventListener {
     private Connection conn;
+    private Map<String, Integer> recordCounts;
     
     public void open(String location) {
         try {
         File outbound = new File(location);
         if (outbound.exists()) {
             outbound.delete();
+        } else {
+            // create the directory if necessary
+            File dir = outbound.getParentFile();
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
         }
         Class.forName("org.sqlite.JDBC");
         this.conn = DriverManager.getConnection("jdbc:sqlite:" + location);
@@ -22,6 +32,7 @@ public class SqliteDatabase implements EventListener {
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
         }
+        this.recordCounts = new TreeMap<>();
     }
     
     public void close() {
@@ -72,26 +83,18 @@ public class SqliteDatabase implements EventListener {
 
     @Override
     public void endTables() {
-        try {
-            conn.commit();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        commit();
     }
 
     @Override
     public void startRecords(Table table) {
         System.out.println("Table " + table.getName() + " has " + table.getRowCount() + " rows.");
+        this.recordCounts.put(table.getName(), table.getRowCount());
     }
 
     @Override
     public void endRecords(Table table) {
-        try {
-            conn.commit();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        
+        commit();        
     }
 
     @Override
@@ -101,10 +104,37 @@ public class SqliteDatabase implements EventListener {
 
     @Override
     public void endIndexes(Table table) {
+        commit();
+    }
+    
+    private void commit() {
         try {
-            conn.commit();
+            this.conn.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }        
+    }
+    
+    public void verify() {
+        recordCounts.keySet().stream()
+            .forEach(table -> verifyRecordCount(table));
+    }
+    
+    private void verifyRecordCount(String table) {
+        String sql = "select count(*) from " + table;
+        try {
+            ResultSet rs = conn.createStatement().executeQuery(sql);
+            rs.next();
+            int records = rs.getInt(1);
+            int expected = recordCounts.get(table);
+            if (records != expected) {
+                throw new RuntimeException("Expected " + expected + " records in " + table + ".  Found " + records );
+            } else {
+                System.out.println("Verified " + table + " contains " + records + " records");
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        
     }
 }
