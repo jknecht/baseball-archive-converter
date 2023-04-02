@@ -1,8 +1,8 @@
 
 public class Main {
 
-    public static final String SOURCE_FILE = "inbound/lahman_1871-2021.mdb";
-    public static final String TARGET_FILE = "outbound/lahman_1871-2021.sqlite";
+    public static final String SOURCE_FILE = "inbound/lahman_1871-2022.mdb";
+    public static final String TARGET_FILE = "outbound/lahman_1871-2022.sqlite";
 
     public static void main(String[] args) {
 
