@@ -49,7 +49,7 @@ public class SqliteDatabase implements EventListener {
             System.out.println("Creating table " + table.getName());
             CreateTableStatementBuilder createTableStatementBuilder = new CreateTableStatementBuilder(table);
             String createTableStatement = createTableStatementBuilder.build();
-            conn.createStatement().execute(createTableStatement);           
+            conn.createStatement().execute(createTableStatement);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -68,6 +68,7 @@ public class SqliteDatabase implements EventListener {
 
     @Override
     public void onIndex(Table table, Index index) {
+        if (index.getName().startsWith(".")) return;
         try {
             CreateIndexStatementBuilder createIndexStatementBuilder = new CreateIndexStatementBuilder(table, index);
             String sql = createIndexStatementBuilder.build();
